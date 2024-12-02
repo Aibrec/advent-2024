@@ -1,8 +1,8 @@
-import re
+import time
 
 file_path = 'input.txt'
 
-# Open the file in read mode ('r')
+start = time.time_ns()
 with open(file_path, 'r') as file:
     left_list = []
     right_list = []
@@ -18,4 +18,8 @@ for i in range(len(left_list)):
     distance = abs(left_list[i] - right_list[i])
     sum += distance
 
+end = time.time_ns()
 print(f"Sum is {sum}")
+
+time_in_microseconds = (end-start) / 1000
+print(f"took {time_in_microseconds}μs")

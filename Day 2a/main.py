@@ -1,7 +1,8 @@
-import re
+import time
 
 file_path = 'input.txt'
 
+start = time.time_ns()
 # Open the file in read mode ('r')
 with open(file_path, 'r') as file:
     safe = 0
@@ -33,5 +34,9 @@ with open(file_path, 'r') as file:
             previous = current
         else:
             safe += 1
-
+end = time.time_ns()
 print(f"safe is {safe}")
+
+time_in_microseconds = (end-start) / 1000
+print(f"took {time_in_microseconds}μs")
+

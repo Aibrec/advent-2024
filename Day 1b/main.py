@@ -1,8 +1,8 @@
-import re
+import time
 
 file_path = 'input.txt'
 
-# Open the file in read mode ('r')
+start = time.time_ns()
 with open(file_path, 'r') as file:
     left_list = []
     right_dict = {}
@@ -20,4 +20,8 @@ for i in range(len(left_list)):
     if left_list[i] in right_dict:
         sum += right_dict[left_list[i]] * left_list[i]
 
+end = time.time_ns()
 print(f"Sum is {sum}")
+
+time_in_microseconds = (end-start) / 1000
+print(f"took {time_in_microseconds}μs")
