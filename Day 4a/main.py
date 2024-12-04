@@ -1,5 +1,5 @@
 import time
-import re
+import regex as re
 
 file_path = 'input.txt'
 
@@ -15,38 +15,41 @@ def search_diagonal(x_unit, y_unit, x, y, word_search, line_length, num_lines):
     else:
         return 1
 
+def search_with_gaps(word_search, gap_size):
+    space_pattern = f".{{{gap_size}}}"
+    pattern = f"X{space_pattern}M{space_pattern}A{space_pattern}S"
+    matches = re.findall(pattern,word_search, overlapped=True)
+
+    reverse_pattern = f"S{space_pattern}A{space_pattern}M{space_pattern}X"
+    matches.extend(re.findall(reverse_pattern,word_search, overlapped=True))
+
+    sum = 0
+    for match in matches:
+        if match.count('|') == 3:
+            sum += 1
+    return sum
+
+def search(word_search):
+    matches = re.findall("XMAS",word_search)
+    matches.extend(re.findall("SAMX",word_search))
+    return len(matches)
+
 start = time.time_ns()
 with open(file_path, 'r') as file:
 
     sum = 0
     enabled = True
-    word_search = []
+    word_search = ""
     sum = 0
     for line in file:
-        word_search.append(line.strip())
+        line_length = len(line.strip()) + 1
+        word_search += f"{line.strip()}|"
 
-    for line in word_search:
-        xmas = re.findall('XMAS', line)
-        samx = re.findall('SAMX', line)
-        sum += (len(xmas) + len(samx))
-
-    for x in range(len(word_search[0])):
-        vertical_line = "".join([word_search[y][x] for y in range(len(word_search))])
-        xmas = re.findall('XMAS', vertical_line)
-        samx = re.findall('SAMX', vertical_line)
-        sum += (len(xmas) + len(samx))
-
-    line_length = len(word_search[0])
-    num_lines = len(word_search)
-    for x in range(line_length):
-        for y in range(num_lines):
-            if word_search[y][x] != 'X':
-                continue
-
-            sum += search_diagonal(1, 1, x, y, word_search, line_length, num_lines)
-            sum += search_diagonal(-1, 1, x, y, word_search, line_length, num_lines)
-            sum += search_diagonal(1, -1, x, y, word_search, line_length, num_lines)
-            sum += search_diagonal(-1, -1, x, y, word_search, line_length, num_lines)
+    horizontal = search(word_search)
+    vertical = search_with_gaps(word_search, line_length - 1)
+    diagonal_right = search_with_gaps(word_search, line_length)
+    diagonal_left = search_with_gaps(word_search, line_length - 2)
+    sum += horizontal + vertical + diagonal_right + diagonal_left
 
 end = time.time_ns()
 print(f"sum is {sum}")
