@@ -22,6 +22,7 @@ def check_for_xmas(y, x, word_search, line_length, num_lines):
     if y+3 < num_lines and (word_search[y][x] + word_search[y+1][x] + word_search[y+2][x] + word_search[y+3][x]) == 'XMAS':
         sum += 1
 
+    # Nicer, but slower
     # for yi in (1,-1):
     #     for xi in (1,-1):
     #         if 0 <= (x+xi*3) < line_length and 0 <= (y+yi*3) < num_lines:
