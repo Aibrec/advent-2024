@@ -1,5 +1,4 @@
 import time
-import copy
 
 file_path = 'input.txt'
 
@@ -31,42 +30,24 @@ def turn_right(dir):
     elif dir == (0,-1):
         return (-1,0)
 
-def dir_to_char(dir):
-    if dir == (-1,0):
-        return '^'
-    elif dir == (0,1):
-        return '>'
-    elif dir == (1,0):
-        return 'v'
-    elif dir == (0,-1):
-        return '<'
-
-def next_blockage(coord, dir, blockages)
+def next_blockage(coord, dir, blockages):
     if dir[0] != 0:
-        i = 0
-    else:
         i = 1
+        z = 0
+    else:
+        i = 0
+        z = 1
 
-    if dir[i] > 0:
-        for block in blockages[i]:
-            if block[i] > coord[i]:
-                stop = block[i]
-                break
-        else:
-            # off edge of map
-            return None
+    if dir[z] > 0:
+        stop = next((block for block in blockages[i][coord[i]] if block[z] > coord[z]), None)
     else: # dir[i] < 0
-        for block in blockages[i]:
-            if block[i] > coord[i]:
-                stop = block[i]
-                break
-        else:
-            # off edge of map
-            return None
+        stop = next((block for block in blockages[i][coord[i]][::-1] if block[z] < coord[z]), None)
+
+    return stop
 
 def walk(coord, dir, map):
     squares_visited = {coord}
-    loop_detector = {coord, dir}
+
     try:
         while True:
             if coord[0]+dir[0] < 0 or coord[1]+dir[1] < 0:
@@ -76,33 +57,51 @@ def walk(coord, dir, map):
             if map[next_coord[0]][next_coord[1]] != '#':
                 coord = next_coord
                 squares_visited.add(coord)
-
-                if (coord, dir) in loop_detector:
-                    return squares_visited, False
-                else:
-                    loop_detector.add((coord, dir))
-
             else:
                 dir = turn_right(dir)
     except IndexError:
         # Walked off the map, done
         pass
 
-    return squares_visited, True
+    return squares_visited
+
+def detect_loop(coord, dir, blockages):
+    loop_detector = {coord, dir}
+    while True:
+        block = next_blockage(coord, dir, blockages)
+        if not block:
+            return False # No loop found
+
+        coord = (block[0] - dir[0], block[1] - dir[1])
+        dir = turn_right(dir)
+
+        if (coord, dir) in loop_detector:
+            return True # Loop found
+        else:
+            loop_detector.add((coord, dir))
 
 start_dir = (-1, 0)
-squares_visited, no_loop = walk(start_coord, start_dir, map)
-
+squares_visited = walk(start_coord, start_dir, map)
+blockages = (blockages_by_y, blockages_by_x)
 loops_caused = 0
 for i, square in enumerate(squares_visited):
     if square == start_coord:
         continue
 
-    obstructed_map = copy.deepcopy(map)
-    obstructed_map[square[0]][square[1]] = '#'
-    _, no_loop = walk(start_coord, start_dir, obstructed_map)
-    if not no_loop:
+    before_y = blockages[0][square[0]].copy()
+    before_x = blockages[1][square[1]].copy()
+
+    blockages[0][square[0]].append(square)
+    blockages[0][square[0]].sort()
+    blockages[1][square[1]].append(square)
+    blockages[1][square[1]].sort()
+
+    has_loop = detect_loop(start_coord, start_dir, blockages)
+    if has_loop:
         loops_caused += 1
+
+    blockages[0][square[0]] = before_y
+    blockages[1][square[1]] = before_x
 
 end = time.time_ns()
 print(f"sum is {loops_caused}")
