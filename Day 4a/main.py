@@ -67,13 +67,13 @@ with open(file_path, 'r') as file:
     for line in file:
         word_search.append(line.strip())
 
-    sum = 0
-    for y, column in enumerate(word_search):
-        for x, char in enumerate(column):
-            if char != 'X':
-                continue
-            else:
-                sum += check_for_xmas(y, x, word_search)
+sum = 0
+for y, column in enumerate(word_search):
+    for x, char in enumerate(column):
+        if char != 'X':
+            continue
+        else:
+            sum += check_for_xmas(y, x, word_search)
 
 end = time.time_ns()
 print(f"sum is {sum}")
