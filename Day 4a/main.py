@@ -1,14 +1,16 @@
 import time
-import re
 
 file_path = 'input.txt'
 
-def check_for_xmas(y, x, word_search, line_length, num_lines):
+def check_for_xmas(y, x, word_search):
     sum = 0
 
     # Check forwards
-    if x+3 < line_length and word_search[y][x:x+4] == 'XMAS':
-        sum += 1
+    try:
+        if word_search[y][x:x+4] == 'XMAS':
+            sum += 1
+    except IndexError:
+        pass
 
     # Check backwards
     if x >= 3 and word_search[y][x-3:x+1] == 'SAMX':
@@ -19,8 +21,11 @@ def check_for_xmas(y, x, word_search, line_length, num_lines):
         sum += 1
 
     # Check down
-    if y+3 < num_lines and (word_search[y][x] + word_search[y+1][x] + word_search[y+2][x] + word_search[y+3][x]) == 'XMAS':
-        sum += 1
+    try:
+        if (word_search[y][x] + word_search[y+1][x] + word_search[y+2][x] + word_search[y+3][x]) == 'XMAS':
+            sum += 1
+    except IndexError:
+        pass
 
     # Nicer, but slower
     # for yi in (1,-1):
@@ -29,20 +34,14 @@ def check_for_xmas(y, x, word_search, line_length, num_lines):
     #             if (word_search[y][x] + word_search[y + yi*1][x + xi*1] + word_search[y + yi*2][x + xi*2] + word_search[y + yi*3][x + xi*3]) == 'XMAS':
     #                 sum += 1
 
-    #
     # Check diagonal up-left
-    try:
-        if x >= 3 and y >= 3:
-            if (word_search[y][x] + word_search[y-1][x-1] + word_search[y-2][x-2] + word_search[y-3][x-3]) == 'XMAS':
-                sum += 1
-    except IndexError:
-        pass
+    if x >= 3 and y >= 3 and (word_search[y][x] + word_search[y-1][x-1] + word_search[y-2][x-2] + word_search[y-3][x-3]) == 'XMAS':
+        sum += 1
 
     # Check diagonal up-right
     try:
-        if y >= 3:
-            if (word_search[y][x] + word_search[y-1][x+1] + word_search[y-2][x+2] + word_search[y-3][x+3]) == 'XMAS':
-                sum += 1
+        if y >= 3 and (word_search[y][x] + word_search[y-1][x+1] + word_search[y-2][x+2] + word_search[y-3][x+3]) == 'XMAS':
+            sum += 1
     except IndexError:
         pass
 
@@ -55,9 +54,8 @@ def check_for_xmas(y, x, word_search, line_length, num_lines):
 
     # Check diagonal down-left
     try:
-        if x >= 3:
-            if (word_search[y][x] + word_search[y+1][x-1] + word_search[y+2][x-2] + word_search[y+3][x-3]) == 'XMAS':
-                sum += 1
+        if x >= 3 and (word_search[y][x] + word_search[y+1][x-1] + word_search[y+2][x-2] + word_search[y+3][x-3]) == 'XMAS':
+            sum += 1
     except IndexError:
         pass
 
@@ -65,22 +63,17 @@ def check_for_xmas(y, x, word_search, line_length, num_lines):
 
 start = time.time_ns()
 with open(file_path, 'r') as file:
-
-    sum = 0
-    enabled = True
     word_search = []
-    sum = 0
     for line in file:
         word_search.append(line.strip())
 
-    line_length = len(word_search[0])
-    num_lines = len(word_search)
-    for x in range(line_length):
-        for y in range(num_lines):
-            if word_search[y][x] != 'X':
+    sum = 0
+    for y, column in enumerate(word_search):
+        for x, char in enumerate(column):
+            if char != 'X':
                 continue
-
-            sum += check_for_xmas(y, x, word_search, line_length, num_lines)
+            else:
+                sum += check_for_xmas(y, x, word_search)
 
 end = time.time_ns()
 print(f"sum is {sum}")
