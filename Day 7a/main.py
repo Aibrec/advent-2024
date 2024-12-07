@@ -1,4 +1,5 @@
 import time
+from numbers import Number
 
 file_path = 'input.txt'
 
@@ -10,22 +11,27 @@ with open(file_path, 'r') as file:
         numbers = parts[1].split()
         problems.append((int(parts[0]), tuple([int(n) for n in numbers])))
 
-def solve_problem(target, current, numbers):
-    if target == current and not numbers:
-        return current
+def solve_problem_backward(current, numbers):
+    if current == 0 and not numbers:
+        return True
 
-    if target < current or not numbers:
-        return 0
+    if current < 0 or not numbers:
+         return False
 
-    next_number = numbers[0]
-    if result := solve_problem(target, next_number+current, numbers[1:]):
+    next_number = numbers[-1]
+    if result := solve_problem_backward(current-next_number, numbers[:-1]):
         return result
-    else:
-        return solve_problem(target, next_number*current, numbers[1:])
+
+    if current % next_number == 0:
+        if result := solve_problem_backward(current//next_number, numbers[:-1]):
+            return result
+
+    return False
 
 sum = 0
 for problem in problems:
-    sum += solve_problem(problem[0], problem[1][0], problem[1][1:])
+    if solve_problem_backward(problem[0], problem[1]):
+        sum += problem[0]
 
 end = time.time_ns()
 print(f"sum is {sum}")
