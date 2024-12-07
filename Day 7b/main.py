@@ -13,33 +13,37 @@ with open(file_path, 'r') as file:
 def reverse_concatenation(l, r):
     if str(l)[-1*len(str(r)):] == str(r):
         l_without_r = str(l)[:-1*len(str(r))]
+        if l_without_r == '':
+            return False
         return int(l_without_r)
     else:
         return False
 
-def solve_problem_backward(current, numbers):
-    if current == 0 and not numbers:
+def solve_problem_backward(target, current, numbers):
+    if current == target and not numbers:
         return True
 
-    if current < 0 or not numbers:
+    if current < target or not numbers:
          return False
 
     next_number = numbers[-1]
-    if result := solve_problem_backward(current-next_number, numbers[:-1]):
-        return result
-
-    if current % next_number == 0:
-        if result := solve_problem_backward(current//next_number, numbers[:-1]):
-            return result
 
     if current_without_next := reverse_concatenation(current, next_number):
-        return solve_problem_backward(current_without_next, numbers[:-1])
+        if result := solve_problem_backward(target, current_without_next, numbers[:-1]):
+            return result
+
+    if current % next_number == 0:
+        if result := solve_problem_backward(target, current//next_number, numbers[:-1]):
+            return result
+
+    if result := solve_problem_backward(target, current-next_number, numbers[:-1]):
+        return result
 
     return False
 
 sum = 0
 for problem in problems:
-    if solve_problem_backward(problem[0], problem[1]):
+    if solve_problem_backward(problem[1][0], problem[0], problem[1][1:]):
         sum += problem[0]
 
 end = time.time_ns()
