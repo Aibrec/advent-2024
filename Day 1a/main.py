@@ -2,7 +2,7 @@ import time
 
 file_path = 'input.txt'
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     left_list = []
     right_list = []
@@ -18,8 +18,8 @@ for i in range(len(left_list)):
     distance = abs(left_list[i] - right_list[i])
     sum += distance
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"Sum is {sum}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

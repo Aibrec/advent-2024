@@ -13,7 +13,7 @@ def check_for_mas(y, x, word_search):
         return False
 
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     word_search = []
     for line in file:
@@ -28,8 +28,8 @@ with open(file_path, 'r') as file:
             if check_for_mas(y, x, word_search):
                 sum +=1
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {sum}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

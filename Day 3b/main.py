@@ -3,7 +3,7 @@ import re
 
 file_path = 'input.txt'
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     mul = re.compile('((mul)\((\d+),(\d+)\))|(do\(\))|(don\'t\(\))')
     sum = 0
@@ -21,8 +21,8 @@ with open(file_path, 'r') as file:
             elif match[4] == 'do()':
                 enabled = True
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {sum}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

@@ -2,7 +2,7 @@ import time
 
 file_path = 'input.txt'
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     map = []
     for line in file:
@@ -103,8 +103,8 @@ for i, square in enumerate(squares_visited):
     blockages[0][square[0]] = before_y
     blockages[1][square[1]] = before_x
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {loops_caused}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

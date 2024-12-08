@@ -50,7 +50,7 @@ def try_variants(i, numbers):
 
     return False
 
-start = time.time_ns()
+start = time.perf_counter()
 # Open the file in read mode ('r')
 with open(file_path, 'r') as file:
     safe = 0
@@ -59,8 +59,8 @@ with open(file_path, 'r') as file:
         diff_list = difference_list(line.split())
         if (fail_index := find_first_unsafe(diff_list, numbers)) == -1 or try_variants(fail_index, numbers):
             safe += 1
-end = time.time_ns()
+end = time.perf_counter()
 print(f"safe is {safe}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

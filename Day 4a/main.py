@@ -61,7 +61,7 @@ def check_for_xmas(y, x, word_search):
 
     return sum
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     word_search = []
     for line in file:
@@ -75,8 +75,8 @@ for y, column in enumerate(word_search):
         else:
             sum += check_for_xmas(y, x, word_search)
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {sum}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

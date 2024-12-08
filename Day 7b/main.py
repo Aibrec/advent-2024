@@ -2,7 +2,7 @@ import time
 
 file_path = 'input.txt'
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     problems = []
     for line in file:
@@ -46,8 +46,8 @@ for problem in problems:
     if solve_problem_backward(problem[1][0], problem[0], problem[1][1:]):
         sum += problem[0]
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {sum}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

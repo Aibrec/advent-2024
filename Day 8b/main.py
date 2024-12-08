@@ -2,7 +2,7 @@ import time
 
 file_path = 'input.txt'
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     map = []
     letter_maps = {}
@@ -32,8 +32,8 @@ for char, points in letter_maps.items():
                 antinode = (antinode[0]+difference[0], antinode[1]+difference[1])
 
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {len(antinodes)}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")

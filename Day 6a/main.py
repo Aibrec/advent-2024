@@ -2,7 +2,7 @@ import time
 
 file_path = 'input.txt'
 
-start = time.time_ns()
+start = time.perf_counter()
 with open(file_path, 'r') as file:
     map = []
     for line in file:
@@ -47,8 +47,8 @@ start_dir = (-1, 0)
 squares_visited = walk(start_coord, start_dir, map)
 sum = len(squares_visited)
 
-end = time.time_ns()
+end = time.perf_counter()
 print(f"sum is {sum}")
 
-time_in_microseconds = (end-start) / 1000
-print(f"took {time_in_microseconds}μs")
+time_in_microseconds = (end-start) * 1000000
+print(f"took {time_in_microseconds:.2f}μs")
