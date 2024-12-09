@@ -1,70 +1,81 @@
 import time
+import llist
+from llist import dllist
 
 file_path = 'input.txt'
 
 start = time.perf_counter()
 with open(file_path, 'r') as file:
-    defragged = []
-    fragged = None
     for line in file:
-        fragged = list([int(n) for n in line.strip()])
+        input = list([int(n) for n in line.strip()])
 
-left = 0
-right = len(fragged) - 1
-if ((right % 2) + 1) == 0:
-    right -= 1  # If it's even it's pointing at blank space, so go down to the file instead
+disk = []
+next_type = "file"
+next_file = 0
+free_space_indexes = []
+file_indexes = []
+for n in input:
+    if next_type == "file":
+        disk.append((next_file, n))
+        file_indexes.append(len(disk)-1)
+        next_file += 1
+        next_type = "free"
+    elif next_type == "free":
+        if n != 0:
+            disk.append([-1, n, dllist()])
+            free_space_indexes.append(len(disk)-1)
+        next_type = "file"
 
-left_file_count = 0
-right_file_count = 100000  # Arbitrary, just has to be higher than half the total or so
+right = len(file_indexes) - 1
+right_file_id = 0
 right_file_remaining = 0
-next_type = "File"
-while right >= left:
-    if next_type == "File":
-        # Place the file from the left into the defragged disk
-        defragged.append((left_file_count, fragged[left]))
-        left_file_count += 1
-        left += 1
-        next_type = "Free space"
-    elif next_type == "Free space":
-        # Fill in the free space with a file from the right
-        space_available = fragged[left]
-        while space_available:
-            if right_file_remaining:
-                space_used = min(space_available, right_file_remaining)
-                defragged.append((right_file_count, min(space_available, right_file_remaining)))
-                right_file_remaining = max(0, right_file_remaining - space_used)
-                space_available = max(0, space_available - space_used)
-            else:
-                # Get a file from the right
-                right_file_remaining = fragged[right]
-                right -= 2
-                right_file_count += 1
-        left += 1
-        next_type = "File"
+for left in free_space_indexes:
+    file = disk[left]
+
+    # Fill in the free space with a file from the right
+    space_available = file[1]
+    while space_available:
+        if not right_file_remaining:
+            if file_indexes[right] < left:
+                break
+
+            # Get a file from the right
+            file_index = file_indexes[right]
+            right_file_id = disk[file_index][0]
+            right_file_remaining = disk[file_index][1]
+            disk[file_index] = None
+            right -= 1
+
+        if right_file_remaining:
+            space_used = min(space_available, right_file_remaining)
+            file[2].append((right_file_id, space_used))
+            file[1] -= space_used
+
+            right_file_remaining = max(0, right_file_remaining - space_used)
+            space_available = max(0, space_available - space_used)
 
 if right_file_remaining:
-    defragged.append((right_file_count, right_file_remaining))
-
-total_files = right_file_count-100000 + left_file_count - 1
-right_file_maps = {}
-for i, file in enumerate(defragged):
-    if file[0] >= 100000:
-        if file[0] not in right_file_maps:
-            right_file_maps[file[0]] = total_files
-            total_files -= 1
-
-        val = (right_file_maps[file[0]], file[1])
-        defragged[i] = val
+    disk[file_indexes[right+1]] = (right_file_id, right_file_remaining)
 
 def sum_1_to_n(n):
     return (n * (n+1)) // 2
 
 sum = 0
 position = 0
-for file in defragged:
-    part = file[0] * ((position * file[1]) + sum_1_to_n(file[1] - 1))
-    sum += part
-    position += file[1]
+for file in disk:
+    if file is None:
+        break
+
+    if file[0] != -1:
+        part = file[0] * ((position*file[1]) + sum_1_to_n(file[1]-1))
+        sum += part
+        position += file[1]
+    else:
+        for inner_file in file[2]:
+            part = inner_file[0] * ((position * inner_file[1]) + sum_1_to_n(inner_file[1] - 1))
+            sum += part
+            position += inner_file[1]
+        position += file[1]
 
 end = time.perf_counter()
 print(f"sum is {sum}")
