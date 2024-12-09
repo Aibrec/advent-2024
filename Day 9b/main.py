@@ -31,6 +31,7 @@ for i, file in enumerate(disk):
         if file[1] not in free_spaces:
             free_spaces[file[1]] = []
         free_spaces[file[1]].append((i, file))
+max_s = max(free_spaces.keys())
 
 i = 0
 while i < len(disk):
@@ -40,8 +41,8 @@ while i < len(disk):
 
         largest_index = -1
         largest_index_s = -1
-        for s in free_spaces.keys():
-            if s < size or not free_spaces[s]:
+        for s in range(size, max_s+1):
+            if s not in free_spaces or not free_spaces[s]:
                 continue
 
             right_most_space = free_spaces[s][-1]
