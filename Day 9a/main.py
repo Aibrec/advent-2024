@@ -10,8 +10,7 @@ with open(file_path, 'r') as file:
         fragged = list([int(n) for n in line.strip()])
 
 left = 0
-right = len(fragged) - 1 # TODO: Have to check it's an odd number.
-
+right = len(fragged) - 1
 if ((right % 2) + 1) == 0:
     right -= 1  # If it's even it's pointing at blank space, so go down to the file instead
 
