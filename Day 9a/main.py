@@ -56,12 +56,15 @@ for i, file in enumerate(defragged):
         val = (right_file_maps[file[0]], file[1])
         defragged[i] = val
 
+def sum_1_to_n(n):
+    return (n * (n+1)) // 2
+
 sum = 0
 position = 0
 for file in defragged:
-    for i in range(1,file[1]+1):
-        sum += position * file[0]
-        position += 1
+    part = file[0] * ((position * file[1]) + sum_1_to_n(file[1] - 1))
+    sum += part
+    position += file[1]
 
 end = time.perf_counter()
 print(f"sum is {sum}")
