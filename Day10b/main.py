@@ -7,12 +7,12 @@ start = time.perf_counter()
 with open(file_path, 'r') as file:
     map = []
     for line in file:
-        map.append(list([int(n) for n in line.strip()]))
+        map.append(line.strip())
 
 zeros = defaultdict(int)
 for y, line in enumerate(map):
     for x, char in enumerate(line):
-        if char == 0:
+        if char == "0":
             zeros[(y,x)] += 1
 
 def get_adjacent(coords):
@@ -24,7 +24,7 @@ def coords_that_match(map, coords, value):
         if y >= 0 and x >= 0:
             try:
                 val = map[y][x]
-                if int(val) == value:
+                if val == value:
                     matching.append((y,x))
             except IndexError:
                 continue
@@ -35,7 +35,7 @@ next = defaultdict(int)
 for i in range(1,10):
     for coord, paths in current.items():
         adjacent = get_adjacent(coord)
-        matching = coords_that_match(map, adjacent, i)
+        matching = coords_that_match(map, adjacent, str(i))
         for coord in matching:
             next[coord] += paths
     current = next
