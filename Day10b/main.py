@@ -49,4 +49,4 @@ end = time.perf_counter()
 print(f"sum is {sum}")
 
 time_in_microseconds = (end-start) * 1000000
-print(f"took {time_in_microseconds:.2f}μs")
+print(f"took {time_in_microseconds:.0f}μs")
