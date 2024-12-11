@@ -15,19 +15,20 @@ with open(file_path, 'r') as file:
 @functools.cache
 def increment_stone(stone):
     if stone == 0:
-        return [1]
+        return 1,
     elif (len(str_stone := str(stone))) % 2 == 0:
         left = str_stone[:len(str_stone)//2]
         right= str_stone[len(str_stone)//2:]
-        return [int(left), int(right)]
+        return int(left), int(right)
     else:
-        return [stone*2024]
+        return stone*2024,
 
 def increment_all_stones(stones, new_stones):
     for stone, count in stones.items():
-        for new_stone in increment_stone(stone):
-            new_stones[new_stone] += count
-        stones[stone] = 0
+        if count != 0:
+            for new_stone in increment_stone(stone):
+                new_stones[new_stone] += count
+            stones[stone] = 0
 
 new_stones = defaultdict(int)
 for i in range(75):

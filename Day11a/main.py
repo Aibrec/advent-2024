@@ -23,14 +23,13 @@ def increment_stone(stone):
 @functools.cache
 def increment_stone_n_count(stone, n):
     next_stones = increment_stone(stone)
-    n = n-1
-    if n == 0:
-        return len(next_stones)
-    else:
+    if n != 1:
         num_stones = 0
         for next_stone in next_stones:
-            num_stones += increment_stone_n_count(next_stone, n)
+            num_stones += increment_stone_n_count(next_stone, n-1)
         return num_stones
+    else:
+        return len(next_stones)
 
 sum = 0
 for stone in stones:
