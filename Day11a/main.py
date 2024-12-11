@@ -1,6 +1,5 @@
 import time
 import functools
-from collections import defaultdict
 
 file_path = 'input.txt'
 

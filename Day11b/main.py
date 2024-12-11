@@ -6,9 +6,11 @@ file_path = 'input.txt'
 
 start = time.perf_counter()
 with open(file_path, 'r') as file:
-    stones = []
+    stones = defaultdict(int)
     for line in file:
-        stones = list(int(n) for n in line.strip().split())
+        nums = list(int(n) for n in line.strip().split())
+        for num in nums:
+            stones[num] += 1
 
 @functools.cache
 def increment_stone(stone):
@@ -21,24 +23,21 @@ def increment_stone(stone):
     else:
         return [stone*2024]
 
-@functools.cache
-def increment_stone_n_count(stone, n):
-    next_stones = increment_stone(stone)
-    n = n-1
-    if n == 0:
-        return len(next_stones)
-    else:
-        num_stones = 0
-        for next_stone in next_stones:
-            num_stones += increment_stone_n_count(next_stone, n)
-        return num_stones
+def increment_all_stones(stones, new_stones):
+    for stone, count in stones.items():
+        for new_stone in increment_stone(stone):
+            new_stones[new_stone] += count
+        stones[stone] = 0
 
-sum = 0
-for stone in stones:
-    sum += increment_stone_n_count(stone, 75)
+new_stones = defaultdict(int)
+for i in range(75):
+    increment_all_stones(stones, new_stones)
+    stones,new_stones = new_stones, stones
+
+total_stones = sum(stones.values())
 
 end = time.perf_counter()
-print(f"sum is {sum}")
+print(f"sum is {total_stones}")
 
 time_in_microseconds = (end-start) * 1000000
 print(f"took {time_in_microseconds:.0f}μs")
