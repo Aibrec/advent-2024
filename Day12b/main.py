@@ -76,7 +76,7 @@ for y, line in enumerate(farm):
     for x, crop in enumerate(line):
         if (y,x) not in seen_coords:
             field, perimeter = flood_fill((y,x))
-            seen_coords = seen_coords.union(field)
+            seen_coords.update(field)
             fields.append(field)
             total += len(field) * perimeter
 

@@ -20,12 +20,11 @@ def get_value(coord, farm):
             pass
     return -1
 
-def flood_fill(starting_coord, farm):
+def flood_fill(starting_coord, farm, field_crop):
     field = set()
     perimeter = 0
     to_expand = {starting_coord}
 
-    field_crop = get_value(starting_coord, farm)
     while to_expand:
         coord = to_expand.pop()
         adjacent = get_adjacent(coord)
@@ -46,8 +45,8 @@ total = 0
 for y, line in enumerate(farm):
     for x, crop in enumerate(line):
         if (y,x) not in seen_coords:
-            field, perimeter = flood_fill((y,x), farm)
-            seen_coords = seen_coords.union(field)
+            field, perimeter = flood_fill((y,x), farm, crop)
+            seen_coords.update(field)
             fields.append(field)
             total += len(field) * perimeter
 
