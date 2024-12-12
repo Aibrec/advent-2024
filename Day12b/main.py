@@ -1,5 +1,6 @@
 import time
 from collections import defaultdict
+import functools
 
 file_path = 'input.txt'
 
@@ -30,21 +31,17 @@ def perpendicular_dirs(dir):
     else:
         return (1,0), (-1,0)
 
-def follow_line(starting_coord, crop, edge_dir):
-    line = {starting_coord}
-    line_dirs = perpendicular_dirs(edge_dir)
-    for dir in line_dirs:
+def follow_line(starting_coord, edges, edge_dir):
+    for dir in perpendicular_dirs(edge_dir):
         next_coord = starting_coord
         while True:
             next_coord = add_dir(next_coord, dir)
-            next_adj_coord = add_dir(next_coord, edge_dir)
-            if crop == get_value(next_coord) and crop != get_value(next_adj_coord):
-                line.add(next_coord)
+            if next_coord in edges:
+                edges.remove(next_coord)
             else:
                 break
-    return line
 
-def flood_fill(starting_coord, farm):
+def flood_fill(starting_coord):
     field = set()
     to_expand = {starting_coord}
 
@@ -67,8 +64,7 @@ def flood_fill(starting_coord, farm):
     for dir, edges in edges_by_dir.items():
         while edges:
             edge_coord = edges.pop()
-            line = follow_line(edge_coord, field_crop, dir)
-            edges -= line
+            follow_line(edge_coord, edges, dir)
             lines += 1
 
     return field, lines
@@ -79,7 +75,7 @@ total = 0
 for y, line in enumerate(farm):
     for x, crop in enumerate(line):
         if (y,x) not in seen_coords:
-            field, perimeter = flood_fill((y,x), farm)
+            field, perimeter = flood_fill((y,x))
             seen_coords = seen_coords.union(field)
             fields.append(field)
             total += len(field) * perimeter
