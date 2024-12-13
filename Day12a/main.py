@@ -11,7 +11,7 @@ with open(file_path, 'r') as file:
 def get_adjacent(coord):
     return ((coord[0]-1, coord[1]), (coord[0]+1, coord[1]), (coord[0], coord[1]-1), (coord[0], coord[1]+1))
 
-def get_value(coord, farm):
+def get_value(coord):
     y,x = coord
     if y >= 0 and x >= 0:
         try:
@@ -20,16 +20,16 @@ def get_value(coord, farm):
             pass
     return -1
 
-def flood_fill(starting_coord, farm, field_crop):
+def flood_fill(starting_coord):
     field = set()
     perimeter = 0
     to_expand = {starting_coord}
-
+    field_crop = get_value(starting_coord)
     while to_expand:
         coord = to_expand.pop()
         adjacent = get_adjacent(coord)
         for adj_coord in adjacent:
-            adj_crop = get_value(adj_coord, farm)
+            adj_crop = get_value(adj_coord)
             if adj_crop != field_crop:
                 perimeter += 1
             elif adj_coord not in field:
@@ -39,16 +39,18 @@ def flood_fill(starting_coord, farm, field_crop):
 
     return field, perimeter
 
-seen_coords = set()
-fields = []
+def all_pairs(x, y):
+    for a in range(x):
+        for b in range(y):
+            yield (a,b)
+
+to_explore = set(all_pairs(len(farm[0]), len(farm)))
 total = 0
-for y, line in enumerate(farm):
-    for x, crop in enumerate(line):
-        if (y,x) not in seen_coords:
-            field, perimeter = flood_fill((y,x), farm, crop)
-            seen_coords.update(field)
-            fields.append(field)
-            total += len(field) * perimeter
+while to_explore:
+    coord = to_explore.pop()
+    field, perimeter = flood_fill(coord)
+    to_explore -= field
+    total += len(field) * perimeter
 
 end = time.perf_counter()
 print(f"sum is {total}")

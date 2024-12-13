@@ -1,6 +1,5 @@
 import time
 from collections import defaultdict
-import functools
 
 file_path = 'input.txt'
 
@@ -69,16 +68,18 @@ def flood_fill(starting_coord):
 
     return field, lines
 
-seen_coords = set()
-fields = []
+def all_pairs(x, y):
+    for a in range(x):
+        for b in range(y):
+            yield (a,b)
+
 total = 0
-for y, line in enumerate(farm):
-    for x, crop in enumerate(line):
-        if (y,x) not in seen_coords:
-            field, perimeter = flood_fill((y,x))
-            seen_coords.update(field)
-            fields.append(field)
-            total += len(field) * perimeter
+to_explore = set(all_pairs(len(farm[0]), len(farm)))
+while to_explore:
+    coord = to_explore.pop()
+    field, perimeter = flood_fill(coord)
+    to_explore -= field
+    total += len(field) * perimeter
 
 end = time.perf_counter()
 print(f"sum is {total}")
