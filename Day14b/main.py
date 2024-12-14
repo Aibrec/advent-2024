@@ -36,10 +36,6 @@ def print_map(robots, step_count):
     for line in map:
         print("".join(line))
 
-map = []
-for y in range(space[0]):
-    map.append([0] * space[1])
-
 step_count = 0
 robot_locations = set()
 while True:
