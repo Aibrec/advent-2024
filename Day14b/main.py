@@ -1,7 +1,5 @@
 import time
 import re
-
-import numpy
 import numpy as np
 
 file_path = 'input.txt'
@@ -45,8 +43,8 @@ while True:
     robots[1] %= space[1]
 
     # Look for a busy vertical and horizontal line at the same time
-    y_bins = numpy.bincount(robots[0])
-    x_bins = numpy.bincount(robots[1])
+    y_bins = np.bincount(robots[0])
+    x_bins = np.bincount(robots[1])
 
     if y_bins.max() > 20 and x_bins.max() > 20:
         break
