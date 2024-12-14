@@ -1,69 +1,58 @@
 import time
 import re
 
+import numpy
+import numpy as np
+
 file_path = 'input.txt'
 
 start = time.perf_counter()
 with open(file_path, 'r') as file:
-    robots = []
-    pat = re.compile('p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)')
+    robots = [[], [], [], []]
     for line in file:
         match = re.match('p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)', line.strip()).groups()
-        coords = [int(match[1]), int(match[0])]
-        velocity = (int(match[3]), int(match[2]))
-        robots.append([coords, velocity])
-
-space = (103,101)
-def move_robot(robot, steps):
-    robot[0] = (((robot[0][0]+robot[1][0]*steps)%space[0]), ((robot[0][1]+robot[1][1]*steps)% space[1]))
-
-def dirs():
-    return (-1, 0), (1, 0), (0, -1), (0, 1)
-
-# def all_dirs_from(coord):
-#     for dir in dirs():
-#         yield (coord[0]+dir[0], coord[1]+dir[1])
+        robots[0].append(int(match[1]))
+        robots[1].append(int(match[0]))
+        robots[2].append(int(match[3]))
+        robots[3].append(int(match[2]))
+    for i in range(4):
+        robots[i] = np.array(robots[i], np.int16)
 
 def print_map(robots, step_count):
     print(f'\nAfter Step {step_count}')
     map = []
     for y in range(space[0]):
-        map.append([" "] * space[1])
+        map.append(["."] * space[1])
 
-    for robot in robots:
-        map[robot[0][0]][robot[0][1]] = '*'
+    for i in range(len(robots[0])):
+        map[robots[0][i]][robots[1][i]] = '*'
 
     for line in map:
         print("".join(line))
 
+space = (103,101)
+#space = (7,11)
 step_count = 0
-robot_locations = set()
 while True:
     step_count += 1
-    all_unique_locations = True
-    for i, robot in enumerate(robots):
-        robot[0] = (((robot[0][0] + robot[1][0]) % space[0]), ((robot[0][1] + robot[1][1]) % space[1]))
-        if all_unique_locations and robot[0] not in robot_locations:
-            robot_locations.add(robot[0])
-        else:
-            all_unique_locations = False
 
-    # density = 0
-    # for robot_coord in robot_locations:
-    #     for adj in all_dirs_from(robot_coord):
-    #         if adj in robot_locations:
-    #             density += 1
-    # if density > 300:
-    #     print(f'try {step_count}')
+    # Add velocities
+    robots[0] += robots[2]
+    robots[1] += robots[3]
 
-    if len(robot_locations) == len(robots):
-        #print(f'All unique at {step_count}')
-        #print_map(robots, step_count)
+    # Limit to map
+    robots[0] %= space[0]
+    robots[1] %= space[1]
+
+    # Look for a busy vertical and horizontal line at the same time
+    y_bins = numpy.bincount(robots[0])
+    x_bins = numpy.bincount(robots[1])
+
+    if y_bins.max() > 20 and x_bins.max() > 20:
         break
 
-    robot_locations.clear()
-
 end = time.perf_counter()
+print_map(robots, step_count)
 print(f"tree at {step_count}")
 
 time_in_microseconds = (end-start) * 1000000
