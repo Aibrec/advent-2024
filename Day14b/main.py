@@ -9,24 +9,20 @@ with open(file_path, 'r') as file:
     pat = re.compile('p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)')
     for line in file:
         match = re.match('p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)', line.strip()).groups()
-        coords = (int(match[1]), int(match[0]))
+        coords = [int(match[1]), int(match[0])]
         velocity = (int(match[3]), int(match[2]))
         robots.append([coords, velocity])
 
 space = (103,101)
 def move_robot(robot, steps):
-    position = robot[0]
-    velocity = robot[1]
-    absolute_position = (position[0]+velocity[0]*steps, position[1]+velocity[1]*steps)
-    wrapped_position = (absolute_position[0] % space[0], absolute_position[1] % space[1])
-    return wrapped_position
+    robot[0] = (((robot[0][0]+robot[1][0]*steps)%space[0]), ((robot[0][1]+robot[1][1]*steps)% space[1]))
 
 def dirs():
     return (-1, 0), (1, 0), (0, -1), (0, 1)
 
-def all_dirs_from(coord):
-    for dir in dirs():
-        yield (coord[0]+dir[0], coord[1]+dir[1])
+# def all_dirs_from(coord):
+#     for dir in dirs():
+#         yield (coord[0]+dir[0], coord[1]+dir[1])
 
 def print_map(robots, step_count):
     print(f'\nAfter Step {step_count}')
@@ -45,14 +41,16 @@ for y in range(space[0]):
     map.append([0] * space[1])
 
 step_count = 0
+robot_locations = set()
 while True:
     step_count += 1
-    robot_locations = set()
-
+    all_unique_locations = True
     for i, robot in enumerate(robots):
-        position = move_robot(robot, 1)
-        robot[0] = position
-        robot_locations.add(position)
+        robot[0] = (((robot[0][0] + robot[1][0]) % space[0]), ((robot[0][1] + robot[1][1]) % space[1]))
+        if all_unique_locations and robot[0] not in robot_locations:
+            robot_locations.add(robot[0])
+        else:
+            all_unique_locations = False
 
     # density = 0
     # for robot_coord in robot_locations:
@@ -66,6 +64,8 @@ while True:
         #print(f'All unique at {step_count}')
         #print_map(robots, step_count)
         break
+
+    robot_locations.clear()
 
 end = time.perf_counter()
 print(f"tree at {step_count}")
