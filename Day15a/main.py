@@ -26,31 +26,13 @@ for y, line in enumerate(warehouse):
         continue
     break
 
-def char_to_dir(char):
-    if char == '<':
-        return 0,-1
-    elif char == '^':
-        return -1,0
-    elif char == '>':
-        return 0, 1
-    elif char == 'v':
-        return 1,0
-    else:
-        raise ValueError
-
-def add_dir(dir, coord):
-    return dir[0] + coord[0], dir[1] + coord[1]
-
-def get_coord(coord, warehouse):
-    return warehouse[coord[0]][coord[1]]
-
 def move(object, dir, warehouse):
-    next_coord = add_dir(dir, object)
-    char = get_coord(next_coord, warehouse)
+    next_coord = (dir[0] + object[0], dir[1] + object[1])
+    char = warehouse[next_coord[0]][next_coord[1]]
     if char == 'O':
         # Barrel, try moving the barrel
         move(next_coord, dir, warehouse)
-        char = get_coord(next_coord, warehouse)
+        char = warehouse[next_coord[0]][next_coord[1]]
 
     if char == '.':
         # Open space, move to it
@@ -69,7 +51,15 @@ def print_warehouse(warehouse):
     print('')
 
 for command in commands:
-    dir = char_to_dir(command)
+    match command:
+        case '<':
+            dir = (0, -1)
+        case '^':
+            dir = (-1, 0)
+        case '>':
+            dir = (0, 1)
+        case 'v':
+            dir = (1, 0)
     robot = move(robot, dir, warehouse)
     #print_warehouse(warehouse)
 

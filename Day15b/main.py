@@ -1,4 +1,5 @@
 import time
+from unittest import case
 
 file_path = 'input.txt'
 
@@ -36,27 +37,9 @@ for y, line in enumerate(warehouse):
         continue
     break
 
-def char_to_dir(char):
-    if char == '<':
-        return 0,-1
-    elif char == '^':
-        return -1,0
-    elif char == '>':
-        return 0, 1
-    elif char == 'v':
-        return 1,0
-    else:
-        raise ValueError
-
-def add_dir(dir, coord):
-    return dir[0] + coord[0], dir[1] + coord[1]
-
-def get_coord(coord, warehouse):
-    return warehouse[coord[0]][coord[1]]
-
 def move_robot(robot, dir, warehouse):
-    next_coord = add_dir(dir, robot)
-    char = get_coord(next_coord, warehouse)
+    next_coord = (dir[0]+robot[0], dir[1]+robot[1])
+    char =  warehouse[next_coord[0]][next_coord[1]]
     match char:
         case '.':
             # Open space, move to it
@@ -79,9 +62,11 @@ def move_robot(robot, dir, warehouse):
 def get_barrel_sides(coord, barrel_char):
     match barrel_char:
         case ']':
-            return add_dir((0,-1), coord), coord
+            return (coord[0], coord[1]-1), coord
+            #return add_dir((0,-1), coord), coord
         case '[':
-            return coord, add_dir((0, 1), coord)
+            return coord, (coord[0], coord[1]+1)
+            #return coord, add_dir((0, 1), coord)
         case _:
             raise ValueError
 
@@ -93,8 +78,8 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
     while to_move:
         coord = to_move.pop()
         if coord not in cords_moving:
-            next_coord = add_dir(dir, coord)
-            char = get_coord(next_coord, warehouse)
+            next_coord = (dir[0]+coord[0], dir[1]+coord[1])
+            char = warehouse[next_coord[0]][next_coord[1]]
             match char:
                 case '[' | ']':
                     left, right = get_barrel_sides(next_coord, char)
@@ -112,7 +97,7 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
                     # Blocked space, can't move
                     return False
 
-            moves[next_coord] = get_coord(coord, warehouse)
+            moves[next_coord] = warehouse[coord[0]][coord[1]]
             cords_moving.add(coord)
 
     # Everything can be moved, so move it all
@@ -128,7 +113,15 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
 
 #print_warehouse(warehouse)
 for command in commands:
-    dir = char_to_dir(command)
+    match command:
+        case '<':
+            dir = (0, -1)
+        case '^':
+            dir = (-1, 0)
+        case '>':
+            dir = (0, 1)
+        case 'v':
+            dir = (1, 0)
     robot = move_robot(robot, dir, warehouse)
 
     #print(f'command: {command}')
