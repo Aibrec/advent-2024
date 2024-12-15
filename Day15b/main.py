@@ -1,5 +1,4 @@
 import time
-from unittest import case
 
 file_path = 'input.txt'
 
