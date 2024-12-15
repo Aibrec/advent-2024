@@ -30,7 +30,7 @@ for y, line in enumerate(warehouse):
     for x, char in enumerate(line):
         if char == '@':
             robot = (y,x)
-            #warehouse[y][x] = '.
+            warehouse[y][x] = '.'
             break
     else:
         continue
@@ -57,29 +57,33 @@ def get_coord(coord, warehouse):
 def move_robot(robot, dir, warehouse):
     next_coord = add_dir(dir, robot)
     char = get_coord(next_coord, warehouse)
-    if char != '#':
-        if char == '[' or char == ']':
-            # Barrel, try moving the barrel
+    match char:
+        case '.':
+            # Open space, move to it
+            #warehouse[next_coord[0]][next_coord[1]] = warehouse[robot[0]][robot[1]]
+            #warehouse[robot[0]][robot[1]] = '.'
+            return next_coord
+        case '[' | ']':
             if not move_barrel(next_coord, char, dir, warehouse):
                 return robot
-
-        # Open space, move to it
-        warehouse[next_coord[0]][next_coord[1]] = warehouse[robot[0]][robot[1]]
-        warehouse[robot[0]][robot[1]] = '.'
-        return next_coord
-
-    return robot
+            else:
+                #warehouse[next_coord[0]][next_coord[1]] = warehouse[robot[0]][robot[1]]
+                #warehouse[robot[0]][robot[1]] = '.'
+                return next_coord
+        case '#':
+            # Blocked
+            return robot
+        case _:
+            raise ValueError
 
 def get_barrel_sides(coord, barrel_char):
-    if barrel_char == ']':
-        right_coord = coord
-        left_coord = add_dir((0,-1), coord)
-    elif barrel_char == '[':
-        left_coord = coord
-        right_coord = add_dir((0, 1), coord)
-    else:
-        raise ValueError
-    return left_coord, right_coord
+    match barrel_char:
+        case ']':
+            return add_dir((0,-1), coord), coord
+        case '[':
+            return coord, add_dir((0, 1), coord)
+        case _:
+            raise ValueError
 
 def move_barrel(barrel, barrel_char, dir, warehouse):
     left_coord, right_coord = get_barrel_sides(barrel, barrel_char)
@@ -91,11 +95,12 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
         if coord not in cords_moving:
             next_coord = add_dir(dir, coord)
             char = get_coord(next_coord, warehouse)
-            if char == '[' or char == ']':
-                to_move.update(get_barrel_sides(next_coord, char))
-            elif char == '#':
-                # Blocked space, can't move
-                return False
+            match char:
+                case '[' | ']':
+                    to_move.update(get_barrel_sides(next_coord, char))
+                case '#':
+                    # Blocked space, can't move
+                    return False
 
             moves[next_coord] = get_coord(coord, warehouse)
             cords_moving.add(coord)
@@ -104,9 +109,10 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
     for coord, char in moves.items():
         warehouse[coord[0]][coord[1]] = char
 
-    left_empty = cords_moving - set(moves.keys())
-    for coord in left_empty:
-        warehouse[coord[0]][coord[1]] = '.'
+    # Set any coord that moved but wasn't filled to empty
+    for coord in cords_moving:
+        if coord not in moves:
+            warehouse[coord[0]][coord[1]] = '.'
 
     return True
 
