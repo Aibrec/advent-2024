@@ -59,20 +59,8 @@ def move_robot(robot, dir, warehouse):
         case _:
             raise ValueError
 
-def get_barrel_sides(coord, barrel_char):
-    match barrel_char:
-        case ']':
-            return (coord[0], coord[1]-1), coord
-            #return add_dir((0,-1), coord), coord
-        case '[':
-            return coord, (coord[0], coord[1]+1)
-            #return coord, add_dir((0, 1), coord)
-        case _:
-            raise ValueError
-
 def move_barrel(barrel, barrel_char, dir, warehouse):
-    left_coord, right_coord = get_barrel_sides(barrel, barrel_char)
-    to_move = {left_coord, right_coord}
+    to_move = {barrel, (barrel[0], barrel[1]+1) if barrel_char == '[' else (barrel[0], barrel[1]-1)}
     moves = {}
     cords_moving = set()
     while to_move:
@@ -81,18 +69,26 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
             next_coord = (dir[0]+coord[0], dir[1]+coord[1])
             char = warehouse[next_coord[0]][next_coord[1]]
             match char:
-                case '[' | ']':
-                    left, right = get_barrel_sides(next_coord, char)
-                    match dir:
-                        case (0,-1): # Pushing from the left
-                            moves[left] = ']'
-                            to_move.add(left)
-                        case (0,1): # Pushing from the right
-                            moves[right] = '['
-                            to_move.add(right)
-                        case _: # Pushing up or down
-                            to_move.add(left)
-                            to_move.add(right)
+                case ']':
+                    left = (next_coord[0], next_coord[1] - 1)
+                    right = next_coord
+                    if dir[0] != 0:
+                        # Pushing up or down
+                        to_move.add(left)
+                        to_move.add(right)
+                    elif dir == (0,-1):
+                        moves[left] = ']'
+                        to_move.add(left)
+                case '[':
+                    left = next_coord
+                    right = (next_coord[0], next_coord[1] + 1)
+                    if dir[0] != 0:
+                        # Pushing up or down
+                        to_move.add(left)
+                        to_move.add(right)
+                    elif dir == (0,1):
+                        moves[right] = '['
+                        to_move.add(right)
                 case '#':
                     # Blocked space, can't move
                     return False
