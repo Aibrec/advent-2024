@@ -1,7 +1,4 @@
 import time
-import re
-import numpy as np
-from sympy.ntheory.modular import crt
 
 file_path = 'input.txt'
 

@@ -97,7 +97,17 @@ def move_barrel(barrel, barrel_char, dir, warehouse):
             char = get_coord(next_coord, warehouse)
             match char:
                 case '[' | ']':
-                    to_move.update(get_barrel_sides(next_coord, char))
+                    left, right = get_barrel_sides(next_coord, char)
+                    match dir:
+                        case (0,-1): # Pushing from the left
+                            moves[left] = ']'
+                            to_move.add(left)
+                        case (0,1): # Pushing from the right
+                            moves[right] = '['
+                            to_move.add(right)
+                        case _: # Pushing up or down
+                            to_move.add(left)
+                            to_move.add(right)
                 case '#':
                     # Blocked space, can't move
                     return False
@@ -131,6 +141,7 @@ for y, line in enumerate(warehouse):
             score += 100*y + x
 
 end = time.perf_counter()
+print_warehouse(warehouse)
 print(f"score is {score}")
 
 time_in_microseconds = (end-start) * 1000000
