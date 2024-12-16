@@ -29,9 +29,6 @@ for y, line in enumerate(racetrack):
             empty_space.add((y,x))
     #print("".join(line))
 
-def add_dir(coord, dir):
-    return (coord[0] + dir[0], coord[1] + dir[1])
-
 all_dirs = ((0, -1), (-1, 0), (0, 1), (1, 0))
 opposite_dir = {
     (0, -1): (0, 1),
@@ -43,35 +40,26 @@ opposite_dir = {
 rt = nx.Graph()
 for space in empty_space:
     for facing in all_dirs:
-        rt.add_node((space, facing))
-
-for space in empty_space:
-    for facing in all_dirs:
-        # Transition if we don't turn
-        adj = add_dir(space, facing)
-        adj_char = racetrack[adj[0]][adj[1]]
-        if adj_char == '.':
-            rt.add_edge((space, facing), (adj, facing), weight=1)
-
-        # Transitions to turn on the spot
         for new_facing in all_dirs:
             if new_facing == opposite_dir[facing]:
                 # Never turn all the way around
                 continue
-            else:
-                rt.add_edge((space, facing), (space, new_facing), weight=1000)
+
+            # Transition if we don't turn
+            adj = (space[0]+new_facing[0], space[1]+new_facing[1])
+            adj_char = racetrack[adj[0]][adj[1]]
+            if adj_char == '.':
+                if facing == new_facing:
+                    rt.add_edge((space, facing), (adj, facing), weight=1)
+                else:
+                    rt.add_edge((space, facing), (adj, new_facing), weight=1001)
 
 start = (start, (0,1))
-ends = list([(end, dir) for dir in all_dirs])
-minimum_cost = 99999999999999999
-for possible_end in ends:
-    try:
-        cost = nx.dijkstra_path_length(rt, start, possible_end)
-        if cost < minimum_cost:
-            minimum_cost = cost
-    except nx.exception.NetworkXNoPath:
-        pass
+for facing in all_dirs:
+    rt.add_edge((end, facing), end, weight=0)
 
+
+minimum_cost = nx.dijkstra_path_length(rt, start, end)
 end_time = time.perf_counter()
 print(f"score is {minimum_cost}")
 

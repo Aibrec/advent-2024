@@ -43,25 +43,20 @@ opposite_dir = {
 rt = nx.DiGraph()
 for space in empty_space:
     for facing in all_dirs:
-        rt.add_node((space, facing))
-
-for space in empty_space:
-    for facing in all_dirs:
-        # Transition if we don't turn
-        adj = add_dir(space, facing)
-        adj_char = racetrack[adj[0]][adj[1]]
-        if adj_char == '.':
-            rt.add_edge((space, facing), (adj, facing), weight=1)
-
-        # Transitions to turn on the spot
         for new_facing in all_dirs:
             if new_facing == opposite_dir[facing]:
                 # Never turn all the way around
                 continue
-            else:
-                rt.add_edge((space, facing), (space, new_facing), weight=1000)
 
-rt.add_node(end)
+            # Transition if we don't turn
+            adj = (space[0]+new_facing[0], space[1]+new_facing[1])
+            adj_char = racetrack[adj[0]][adj[1]]
+            if adj_char == '.':
+                if facing == new_facing:
+                    rt.add_edge((space, facing), (adj, facing), weight=1)
+                else:
+                    rt.add_edge((space, facing), (adj, new_facing), weight=1001)
+
 for facing in all_dirs:
     rt.add_edge((end, facing), end, weight=0)
 
@@ -82,6 +77,7 @@ for middle, cost_from_start in costs_from_start.items():
 
 end_time = time.perf_counter()
 print(f"score is {len(nodes_on_minimum_path)-1}") #saw {count} paths")
+print(f"minimum cost is {minimum_cost}")
 
 time_in_microseconds = (end_time-start_time) * 1000000
 print(f"took {time_in_microseconds:.0f}μs")
