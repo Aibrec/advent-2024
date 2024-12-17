@@ -45,19 +45,17 @@ for space in empty_space:
                 # Never turn all the way around
                 continue
 
-            # Transition if we don't turn
             adj = (space[0]+new_facing[0], space[1]+new_facing[1])
             adj_char = racetrack[adj[0]][adj[1]]
             if adj_char == '.':
                 if facing == new_facing:
-                    rt.add_edge((space, facing), (adj, facing), weight=1)
+                    rt.add_edge((space, facing), (adj, facing))
                 else:
                     rt.add_edge((space, facing), (adj, new_facing), weight=1001)
 
 start = (start, (0,1))
 for facing in all_dirs:
     rt.add_edge((end, facing), end, weight=0)
-
 
 minimum_cost = nx.dijkstra_path_length(rt, start, end)
 end_time = time.perf_counter()

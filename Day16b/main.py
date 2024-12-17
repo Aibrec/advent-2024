@@ -40,7 +40,7 @@ opposite_dir = {
     (1, 0): (-1, 0),
 }
 
-rt = nx.DiGraph()
+rt = nx.Graph()
 for space in empty_space:
     for facing in all_dirs:
         for new_facing in all_dirs:
@@ -53,7 +53,7 @@ for space in empty_space:
             adj_char = racetrack[adj[0]][adj[1]]
             if adj_char == '.':
                 if facing == new_facing:
-                    rt.add_edge((space, facing), (adj, facing), weight=1)
+                    rt.add_edge((space, facing), (adj, facing))
                 else:
                     rt.add_edge((space, facing), (adj, new_facing), weight=1001)
 
@@ -61,19 +61,19 @@ for facing in all_dirs:
     rt.add_edge((end, facing), end, weight=0)
 
 start = (start, (0,1))
-minimum_cost = nx.dijkstra_path_length(rt, start, end)
 
-costs_from_start = nx.single_source_dijkstra(rt, start, cutoff=minimum_cost, weight='weight')[0]
+costs_from_start = nx.single_source_dijkstra(rt, start, weight='weight')[0]
+minimum_cost = costs_from_start[end]
+costs_from_end = nx.single_source_dijkstra(rt, end, cutoff=minimum_cost, weight='weight')[0]
 
-reverse_rt = nx.reverse(rt)
-costs_from_end = nx.single_source_dijkstra(reverse_rt, end, cutoff=minimum_cost, weight='weight')[0]
 nodes_on_minimum_path = set()
 for middle, cost_from_start in costs_from_start.items():
-    if middle[0] not in nodes_on_minimum_path:
-        if middle in costs_from_end:
-            cost_from_end = costs_from_end[middle]
-            if cost_from_start + cost_from_end == minimum_cost:
-                nodes_on_minimum_path.add(middle[0])
+    try:
+        cost_from_end = costs_from_end[middle]
+        if cost_from_start + cost_from_end == minimum_cost:
+            nodes_on_minimum_path.add(middle[0])
+    except KeyError:
+        pass
 
 end_time = time.perf_counter()
 print(f"score is {len(nodes_on_minimum_path)-1}") #saw {count} paths")
