@@ -40,28 +40,28 @@ opposite_dir = {
     (1, 0): (-1, 0),
 }
 
-rt = nx.Graph()
-for space in empty_space:
+def generate_edges(spaces):
+    for space in spaces:
+        for facing in all_dirs:
+            for new_facing in all_dirs:
+                if new_facing == opposite_dir[facing]:
+                    # Never turn all the way around
+                    continue
+
+                adj = (space[0] + new_facing[0], space[1] + new_facing[1])
+                adj_char = racetrack[adj[0]][adj[1]]
+                if adj_char == '.':
+                    if facing == new_facing:
+                        yield (space, facing), (adj, facing), 1
+                    else:
+                        yield (space, facing), (adj, new_facing), 1001
+
     for facing in all_dirs:
-        for new_facing in all_dirs:
-            if new_facing == opposite_dir[facing]:
-                # Never turn all the way around
-                continue
+        yield (end, facing), end, 0
 
-            # Transition if we don't turn
-            adj = (space[0]+new_facing[0], space[1]+new_facing[1])
-            adj_char = racetrack[adj[0]][adj[1]]
-            if adj_char == '.':
-                if facing == new_facing:
-                    rt.add_edge((space, facing), (adj, facing))
-                else:
-                    rt.add_edge((space, facing), (adj, new_facing), weight=1001)
-
-for facing in all_dirs:
-    rt.add_edge((end, facing), end, weight=0)
-
+rt = nx.Graph()
+rt.add_weighted_edges_from(generate_edges(empty_space))
 start = (start, (0,1))
-
 costs_from_start = nx.single_source_dijkstra(rt, start, weight='weight')[0]
 minimum_cost = costs_from_start[end]
 costs_from_end = nx.single_source_dijkstra(rt, end, cutoff=minimum_cost, weight='weight')[0]
