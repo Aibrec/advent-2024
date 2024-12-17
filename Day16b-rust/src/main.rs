@@ -29,17 +29,27 @@ fn read_racetrack() -> (Vec<String>, [i64; 2], [i64; 2]){
     (racetrack, start, end)
 }
 
+#[inline(always)]
 fn reverse_dir(dir:[i64; 2]) -> [i64; 2] {
-    [dir[0]*-1, dir[1]*-1]
+    return if dir[0] == 1 {
+        [-1, 0]
+    } else if dir[0] == -1 {
+        [1, 0]
+    } else if dir[1] == 1 {
+        [0, -1]
+    } else {
+        [0, 1]
+    }
 }
 
+#[inline(always)]
 fn add_dir(coord:[i64; 2], dir:[i64; 2]) ->[i64; 2] {
     [coord[0]+dir[0], coord[1]+dir[1]]
 }
 
-fn populate_graph(racetrack:Vec<String>, end:[i64; 2]) -> UnGraphMap<([i64; 2], [i64; 2]), u64> {//GraphMap<((i64, i64), (i64, i64)), ()> {
+fn populate_graph(racetrack:Vec<String>, end:[i64; 2]) -> UnGraphMap<([i64; 2], [i64; 2]), u64> {
     //let mut rt = GraphMap::<((i64, i64), (i64, i64)), ()>::new();
-    let mut rt:UnGraphMap<([i64; 2], [i64; 2]), u64> = UnGraphMap::new();
+    let mut rt:UnGraphMap<([i64; 2], [i64; 2]), u64> = UnGraphMap::with_capacity(20125, 30000);
 
     let all_dirs = [
         [0, -1],
@@ -48,6 +58,7 @@ fn populate_graph(racetrack:Vec<String>, end:[i64; 2]) -> UnGraphMap<([i64; 2], 
         [-1, 0]
     ];
 
+    //let mut edges:HashSet<(([i64; 2], [i64; 2]), ([i64; 2], [i64; 2]), u64)> = HashSet::new();
     for (y, line) in racetrack.iter().enumerate() {
         for (x, char) in line.chars().enumerate() {
             if char == '.' {
@@ -63,9 +74,11 @@ fn populate_graph(racetrack:Vec<String>, end:[i64; 2]) -> UnGraphMap<([i64; 2], 
                         if adj_char == '.' {
                             if facing == new_facing {
                                 rt.add_edge((space, facing), (adj, facing), 1);
+                                //edges.insert(((space, facing), (adj, facing), 1));
                             }
                             else {
                                 rt.add_edge((space, facing), (adj, new_facing), 1001);
+                                //edges.insert(((space, facing), (adj, new_facing), 1001));
                             }
                         }
                     }
@@ -76,6 +89,7 @@ fn populate_graph(racetrack:Vec<String>, end:[i64; 2]) -> UnGraphMap<([i64; 2], 
 
     for facing in all_dirs {
         rt.add_edge((end, facing), (end, [0,0]), 0);
+        //edges.insert(((end, facing), (end, [0,0]), 0));
     }
 
     rt

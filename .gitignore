@@ -168,4 +168,9 @@ cython_debug/
 .idea/**/dictionaries
 .idea/**/shelf
 
-
+# Rust
+debug/
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
