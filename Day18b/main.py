@@ -45,11 +45,11 @@ for coord in spots_to_block:
         pass
 
     if coord in shortest_path_nodes:
-        if not nx.has_path(memory, start, end):
+        try:
+            shortest_path_nodes = set(nx.shortest_path(memory, start, end))
+        except nx.exception.NetworkXNoPath:
             first_blocked = coord
             break
-
-        shortest_path_nodes = set(nx.shortest_path(memory, start, end))
 
 end_time = time.perf_counter()
 print(f"first block at {coord[1]},{coord[0]}") #saw {count} paths")
