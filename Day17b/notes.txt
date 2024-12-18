@@ -1,0 +1,73 @@
+
+5 is the only 0-7 that results in a 0, so the last cycle has to start with A=5
+
+5 = A // 8 gives 47 >= A >= 40
+    via ((5+1)*8)-1 >= A >= (5*8)
+
+46 is the only one that gives 3, and it's followed by 0
+
+46 = A // 8
+    375 >= A >= 368
+
+Working backward we get:
+
+Eighth: A has to be 0
+Seventh: Last 3 bits of B have to be 0
+    AKA B = k*8 + 0 for some k
+Sixth: 0 = A // 8 has to end up 0, so  0<=A<8
+Fifth: 0 = B xor 4, so B = 4
+Forth: 4 = B xor C,
+    C xor 4 = B
+    B xor 4 = C
+    So they have all the same bits except 4 which is flipped
+        So they're the same ±4 but can't tell which is larger
+    abs(B-C) = 4
+    (B-C)^2 = 16
+    B^2-2BC+CB^2 = 16
+    B-C = ±4
+    C = B±4
+
+Third: C = A//2**B
+    From Sixth we've got 8>A>=0
+    And from First we've got A+B±1 = 8*k for some k
+    A = 8*k - B ± 1
+    B = 8*k - A ± 1
+    C = (8*k - B ± 1) // 2^B
+    C+1 > (8*k - B ± 1) / 2^B
+    B±4+1 > (8*k - B ± 1) / 2^B
+    2^B * (B±4+1) > 8*k - B ± 1
+
+
+    B+4=A//2**B or B-4=A//2**B
+
+
+    Could also write B xor 4 == A // 2**B
+    B±4 = A // 2**B
+    (B±4+1) > A / 2**B > (B±4-1)
+    2^B*(B±4+1) > A > 2^B * (B±4-1)
+
+    C = A // 2**(C xor 4)
+        X = 2**(C xor 4)
+        C = A // X
+            C+1 > A / X
+
+        X = A // C ? probably I think
+
+    C = A // 2**(C xor 4)
+    C+1 > A / 2**(C xor 4)
+
+    2**(C xor 4) * (C+1) > A
+    2**(C xor 4) * (C-1) < A
+
+Second: B = B xor 1, so B has an additional ±1 on it
+    2^B*(B±5+1) > A > 2^B*(B±5-1)
+
+    There's a 2^B on both sides so we can just ignore it for the moment and bring it back later
+    (B±5+1) > A > (B±5-1)
+    A has to be within ±1 set of 2^B, whatever B is
+
+First: B = A mod 8
+    A = B mod 8
+    A+B = 8k for some k
+    (B±5+1) > A > (B±5-1)
+    I'm not sure this is going anywhere
