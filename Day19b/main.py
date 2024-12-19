@@ -12,42 +12,59 @@ with open(file_path, 'r') as file:
             break
 
         available_towels = list(line.split(', '))
-        available_towels.sort(key=len)
-        available_towels = tuple(available_towels)
 
     combinations = []
     for line in file:
         combinations.append(line.strip())
 
+trie_of_available_towels = {
+    'string': '',
+    'next': {}
+}
+
+def add_towel(towel):
+    level = trie_of_available_towels
+    for i, char in enumerate(towel):
+        if char not in level['next']:
+            level['next'][char] = {}
+            level['next'][char]['next'] = {}
+            level['next'][char]['string'] = level['string'] + char
+            level['next'][char]['length'] = len(level['next'][char]['string'])
+            level['next'][char]['is_a_towel'] = False
+        level = level['next'][char]
+    level['is_a_towel'] = True
+
+for towel in available_towels:
+    add_towel(towel)
+
+def match_against_trie(combination):
+    node = trie_of_available_towels
+    valid_towels = []
+    for char in combination:
+        if char not in node['next']:
+            break
+
+        node = node['next'][char]
+        if node['is_a_towel']:
+            valid_towels.append(node['string'])
+    return valid_towels
+
 @functools.cache
-def find_matching_towels_from_start(available_towels, combination):
+def find_matching_towels_from_start(combination):
     if not combination:
         return 1
 
     num_valid = 0
-    for towel in available_towels:
-        if combination.startswith(towel):
-            num_valid += find_matching_towels_from_end(available_towels, combination[len(towel):])
-    return num_valid
-
-@functools.cache
-def find_matching_towels_from_end(available_towels, combination):
-    if not combination:
-        return 1
-
-    num_valid = 0
-    for towel in available_towels:
-        if combination.endswith(towel):
-            num_valid += find_matching_towels_from_start(available_towels, combination[:-1*len(towel)])
+    start_towels = match_against_trie(combination)
+    for towel in start_towels:
+        num_valid += find_matching_towels_from_start(combination[len(towel):])
     return num_valid
 
 def solve(available_towels, combinations):
     possible_combos = 0
     for i, combination in enumerate(combinations):
-        num_valid = find_matching_towels_from_start(available_towels, combination)
+        num_valid = find_matching_towels_from_start(combination)
         possible_combos += num_valid
-        # if i % 10 == 0:
-        #     print(f'Done {i}/{len(combinations)}')
     return possible_combos
 
 result = solve(available_towels, combinations)

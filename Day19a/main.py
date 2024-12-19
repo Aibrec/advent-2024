@@ -17,53 +17,55 @@ with open(file_path, 'r') as file:
     for line in file:
         combinations.append(line.strip())
 
+trie_of_available_towels = {
+    'string': '',
+    'next': {}
+}
+
+def add_towel(towel):
+    level = trie_of_available_towels
+    for i, char in enumerate(towel):
+        if char not in level['next']:
+            level['next'][char] = {}
+            level['next'][char]['next'] = {}
+            level['next'][char]['string'] = level['string'] + char
+            level['next'][char]['length'] = len(level['next'][char]['string'])
+            level['next'][char]['is_a_towel'] = False
+        level = level['next'][char]
+    level['is_a_towel'] = True
+
+for towel in available_towels:
+    add_towel(towel)
+
+def match_against_trie(combination):
+    node = trie_of_available_towels
+    valid_towels = []
+    for char in combination:
+        if char not in node['next']:
+            break
+
+        node = node['next'][char]
+        if node['is_a_towel']:
+            valid_towels.append(node['string'])
+    return valid_towels
+
 @functools.cache
-def find_matching_towels(available_towels, combination):
-    for start_towel in available_towels:
-        if combination.startswith(start_towel):
-            remaining_combination = combination[len(start_towel):]
-            if not remaining_combination:
-                return [start_towel]
-
-            for end_towel in available_towels:
-                if combination.endswith(end_towel):
-                    remaining_combination = remaining_combination[:-1*len(end_towel)]
-
-                    if not remaining_combination:
-                        return [start_towel, end_towel]
-                    elif matching := find_matching_towels(available_towels, remaining_combination):
-                        matching.extend([start_towel, end_towel])
-                        return matching
-    return None
-
-@functools.cache
-def find_matching_towels_from_start(available_towels, combination):
+def find_matching_towels_from_start(combination):
     if not combination:
         return True
 
-    for towel in available_towels:
-        if combination.startswith(towel):
-            if find_matching_towels_from_end(available_towels, combination[len(towel):]):
-                return True
-
-    return False
-
-@functools.cache
-def find_matching_towels_from_end(available_towels, combination):
-    if not combination:
-        return True
-
-    for towel in available_towels:
-        if combination.endswith(towel):
-            if find_matching_towels_from_start(available_towels, combination[:-1*len(towel)]):
-                return True
+    start_towels = match_against_trie(combination)
+    for towel in start_towels:
+        if find_matching_towels_from_start(combination[len(towel):]):
+            return True
 
     return False
 
 valid_combos = 0
 for i, combination in enumerate(combinations):
-    matching_towels = find_matching_towels(available_towels, combination)
+    matching_towels = find_matching_towels_from_start(combination)
     if matching_towels:
+        #print(f"matched {combination}")
         valid_combos += 1
 
 end_time = time.perf_counter()
