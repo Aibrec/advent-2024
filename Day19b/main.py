@@ -60,14 +60,14 @@ def find_matching_towels_from_start(combination):
         num_valid += find_matching_towels_from_start(combination[len(towel):])
     return num_valid
 
-def solve(available_towels, combinations):
+def solve(combinations):
     possible_combos = 0
     for i, combination in enumerate(combinations):
         num_valid = find_matching_towels_from_start(combination)
         possible_combos += num_valid
     return possible_combos
 
-result = solve(available_towels, combinations)
+result = solve(combinations)
 end_time = time.perf_counter()
 print(f"score {result}")
 
