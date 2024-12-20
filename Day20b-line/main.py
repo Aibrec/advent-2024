@@ -1,86 +1,82 @@
 import time
-import networkx as nx
+import array
 
 file_path = 'input.txt'
 
 total_start_time = time.perf_counter()
-with open(file_path, 'r') as file:
-    racetrack = []
-    for line in file:
-        line = line.strip()
-        racetrack.append(list([char for char in line]))
-
+y_len = 0
+x_len = None
 start = None
 end = None
-empty_space = set()
-for y, line in enumerate(racetrack):
-    for x, char in enumerate(line):
-        if char == 'S':
-            start = (y,x)
-            racetrack[y][x] = '.'
-            char = '.'
+with (open(file_path, 'r') as file):
+    racetrack = array.array('l')
+    for line in file:
+        line = line.strip()
+        if (s_loc := line.find('S')) != -1:
+            start = (y_len, s_loc)
 
-        if char == 'E':
-            end = (y,x)
-            racetrack[y][x] = '.'
-            char = '.'
+        if (s_loc := line.find('E')) != -1:
+            end = (y_len, s_loc)
 
-        if char == '.':
-            empty_space.add((y,x))
-    #print("".join(line))
+        x_len = len(line)
+        y_len += 1
+        racetrack.fromlist(list([-1 if char=='#' else 1 for char in line]))
 
 all_dirs = ((0, -1), (-1, 0), (0, 1), (1, 0))
-def generate_edges(spaces):
-    for space in spaces:
-        for dir in all_dirs:
-            adj = (space[0] + dir[0], space[1] + dir[1])
-            adj_char = racetrack[adj[0]][adj[1]]
-            if adj_char == '.':
-                yield space, adj
+no_180_dirs = {
+    (0, -1): ((0, -1), (1, 0), (-1, 0)),
+    (0, 1): ((0, 1), (1, 0), (-1, 0)),
+    (-1, 0): ((-1, 0), (0, 1), (0, -1)),
+    (1, 0): ((1, 0), (0, 1), (0, -1)),
+}
 
-setup_time = time.perf_counter()
+def find_starting_dir(start):
+    for dir in all_dirs:
+        adj = (start[0] + dir[0], start[1] + dir[1])
+        adj_char = racetrack[adj[0]*x_len + adj[1]]
+        if adj_char == 1:
+            return dir
 
-rt = nx.Graph()
-rt.add_edges_from(generate_edges(empty_space))
-generated_graph_time = time.perf_counter()
+def find_line(start, end):
+    line = [start]
+    next = start
+    current_dir = find_starting_dir(start)
+    while next != end:
+        for next_dir in no_180_dirs[current_dir]:
+            adj = (next[0] + next_dir[0], next[1] + next_dir[1])
+            adj_char = racetrack[adj[0]*x_len + adj[1]]
+            if adj_char == 1:
+                next = adj
+                current_dir = next_dir
+                line.append(next)
+                break
+        else:
+            raise Exception('Line broken')
+    line.append(end)
+    return line
 
-costs_from_start = nx.single_source_dijkstra(rt, start)[0]
-target_length = (costs_from_start[end]) - 100
-forward_dijkstra_time = time.perf_counter()
-
-costs_from_end = nx.single_source_dijkstra(rt, end, cutoff=target_length)[0]
-backward_dijkstra_time = time.perf_counter()
+line = find_line(start, end)
+for i, node in enumerate(line):
+    racetrack[node[0] * x_len + node[1]] = len(line) - i
 
 max_jump = 20
 helpful_jumps = 0
-for middle, cost_from_start in costs_from_start.items():
-    for dy in range(-1*max_jump,max_jump+1):
-        max_x = max_jump - abs(dy)
-        for dx in range(-1*max_x,max_x+1):
-            try:
-                jump_end = (middle[0] + dy, middle[1] + dx)
-                cost_to_end = costs_from_end[jump_end]
-                total_cost = abs(dy)+abs(dx)+cost_from_start+cost_to_end
-                if total_cost <= target_length:
-                    helpful_jumps += 1
-            except KeyError:
-                pass
+for i, node in enumerate(line):
+    nodes_remaining_cost_to_end = len(line) - i
+    for dy in range(-1*min(max_jump, node[0]), min(max_jump+1, y_len-node[0])):
+        max_x_jump = max_jump - abs(dy)
+        for dx in range(-1*min(max_x_jump, node[1]), min(max_x_jump+1, x_len-node[1])):
+            end_of_jump_cost = racetrack[(node[0] + dy)*x_len + node[1] + dx]
+            if end_of_jump_cost == -1:
+                continue
+
+            saved_cost = nodes_remaining_cost_to_end - (abs(dy)+abs(dx)+end_of_jump_cost)
+            if saved_cost >= 100:
+                helpful_jumps += 1
+
 
 total_end_time = time.perf_counter()
 print(f"score is {helpful_jumps}")
 
 time_in_microseconds = (total_end_time-total_start_time) * 1000000
 print(f"took {time_in_microseconds:.0f}μs")
-
-print('\n')
-time_to_setup = (setup_time-total_start_time) * 1000000
-print(f"time_to_setup {time_to_setup}")
-time_make_graph = (generated_graph_time-setup_time) * 1000000
-print(f"time_make_graph {time_make_graph}")
-forward_dijkstra = (forward_dijkstra_time-generated_graph_time) * 1000000
-print(f"forward_dijkstra {forward_dijkstra}")
-backward_dijkstra = (backward_dijkstra_time-forward_dijkstra_time) * 1000000
-print(f"backward_dijkstra {backward_dijkstra}")
-big_loop = (total_end_time-backward_dijkstra_time) * 1000000
-print(f"big_loop {big_loop}")
-
