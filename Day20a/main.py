@@ -52,7 +52,7 @@ helpful_jumps = 0
 for middle, cost_from_start in costs_from_start.items():
     for dy in range(-1*max_jump,max_jump+1):
         max_x = max_jump - abs(dy)
-        for dx in range(-1*max_x,max_x+1):
+        for dx in range(-1*max_x,max_x+1, max_x or 1):
             try:
                 jump_end = (middle[0] + dy, middle[1] + dx)
                 cost_to_end = costs_from_end[jump_end]
