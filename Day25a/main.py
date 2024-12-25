@@ -40,34 +40,21 @@ with open(file_path, 'r') as file:
             locks.append(tuple(current))
 
 sorted_locks_by_tumbler = []
-for i in range(5):
-    sorted_locks = sorted(locks, key=lambda lock: lock[i])
-    sorted_locks_by_tumbler.append(sorted_locks)
+for tumbler in range(5):
+    by_height = []
+    for height in range(6):
+        by_height.append(set())
+
+    for lock in locks:
+        height = lock[tumbler]
+        for h in range(height, 6):
+            by_height[h].add(lock)
+    sorted_locks_by_tumbler.append(by_height)
 
 score = 0
 for key in keys:
-    possible_locks = None
-    for tumbler in range(5):
-        overlap_on_tumbler = 6 - key[tumbler]
-        too_high_index = bisect.bisect_left(sorted_locks_by_tumbler[tumbler], overlap_on_tumbler, key=lambda lock: lock[tumbler])
-        sublist_of_valid_locks = sorted_locks_by_tumbler[tumbler][:too_high_index]
-        if possible_locks is None:
-            possible_locks = set(sublist_of_valid_locks)
-        else:
-            possible_locks = possible_locks.intersection(sublist_of_valid_locks)
-            if len(possible_locks) == 0:
-                break
-    score += len(possible_locks)
-
-# This was half as fast but so much simpler
-# score = 0
-# for l, lock in enumerate(locks):
-#     for k, key in enumerate(keys):
-#         for i in range(5):
-#             if (lock[i] + key[i]) >= 6:
-#                 break
-#         else:
-#             score += 1
+    possible_lock_sets = set.intersection(*[sorted_locks_by_tumbler[tumbler][6 - key[tumbler] - 1] for tumbler in range(5)])
+    score += len(possible_lock_sets)
 
 end_time = time.perf_counter()
 print(f"score {score}")
